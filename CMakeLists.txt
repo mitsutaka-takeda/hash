@@ -8,21 +8,30 @@ if(NOT TARGET rapidcheck)
   add_subdirectory("../rapidcheck" "${CMAKE_BINARY_DIR}/rapidcheck")
 endif()
 
-add_executable(hash_test_driver hash/hash_traits.cpp)
+add_executable(hash_test_driver
+  hash/hash_traits.cpp
+  hash/hash_traits.t.cpp
+  )
 
 target_include_directories(hash_test_driver
   PRIVATE
   ${PROJECT_SOURCE_DIR}
-  ${Boost_INCLUDE_DIRS}
   )
+
+target_include_directories(hash_test_driver
+  SYSTEM
+  PRIVATE
+  ${Boost_INCLUDE_DIRS}
+)
 
 target_link_libraries(hash_test_driver
   rapidcheck
+  rapidcheck_boost_test
   )
 
 target_compile_options(hash_test_driver
   PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat>
+  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-documentation-unknown-command>
   )
 
 set_target_properties(hash_test_driver
