@@ -18,10 +18,17 @@ target_include_directories(hash_test_driver
   ${PROJECT_SOURCE_DIR}
   )
 
+get_target_property(
+  RapidCheckBoostTest_INCLUDE_DIRS
+  rapidcheck_boost_test
+  INTERFACE_INCLUDE_DIRECTORIES
+)
+
 target_include_directories(hash_test_driver
   SYSTEM
   PRIVATE
   ${Boost_INCLUDE_DIRS}
+  ${RapidCheckBoostTest_INCLUDE_DIRS}
 )
 
 target_link_libraries(hash_test_driver
@@ -31,9 +38,13 @@ target_link_libraries(hash_test_driver
 
 target_compile_options(hash_test_driver
   PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-documentation-unknown-command>
+  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic>
   )
-
+set_source_files_properties(
+  hash/hash_traits.t.cpp
+  PROPERTIES
+  COMPILE_FLAGS "-Wno-padded -Wno-disabled-macro-expansion -Wno-global-constructors"
+  )
 set_target_properties(hash_test_driver
   PROPERTIES
   FOLDER "hash_test_driver"

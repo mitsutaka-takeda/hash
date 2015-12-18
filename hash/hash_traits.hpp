@@ -5,6 +5,10 @@
 
 namespace hash {
 
+	// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n3980.html
+    // A type T is contiguously hashable if for all combinations of two values of a type,
+    // say x and y, if x == y, then it must also be true that memcmp(addressof(x), addressof(y), sizeof(T)) == 0. 
+    // I.e. if x == y, then x and y have the same bit pattern representation.
     template <typename T>
     struct is_contiguously_hashable;
 
