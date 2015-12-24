@@ -21,11 +21,4 @@ namespace hash {
     template <typename T>
     constexpr bool is_contiguously_hashable_v = is_contiguously_hashable<T>::value;
 
-    template <typename HashaAlgorithm, typename T>
-    inline
-    std::enable_if_t<hash::is_contiguously_hashable_v<T> >
-    hash_append(HashaAlgorithm& h, T const& t){
-        h(std::addressof(t), sizeof(t));
-    }
-
 }  // namespace hash

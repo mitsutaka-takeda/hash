@@ -8,14 +8,50 @@ if(NOT TARGET rapidcheck)
   add_subdirectory("../rapidcheck" "${CMAKE_BINARY_DIR}/rapidcheck")
 endif()
 
-add_executable(hash_test_driver
+add_library(hash_lib
+  hash/hash_append.cpp
+  hash/hash_append.hpp
   hash/hash_traits.cpp
+  hash/hash_traits.hpp
+  hash/integral.cpp
+  hash/integral.hpp
+  hash/sha_256.cpp
+  hash/sha_256.hpp
+  hash/uhash.cpp
+  hash/uhash.hpp
+  )
+
+set_target_properties(hash_lib
+  PROPERTIES
+  FOLDER "hash_lib"
+  )
+
+target_include_directories(hash_lib
+  PUBLIC
+  ${PROJECT_SOURCE_DIR}
+  )
+
+target_include_directories(hash_lib
+  SYSTEM
+  PUBLIC
+  ${Boost_INCLUDE_DIRS}
+  )
+
+target_compile_options(hash_lib
+  PUBLIC
+  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic>
+  )
+
+add_executable(sha_256_test_driver
+  hash/sha_256.t.cpp
+)
+
+add_executable(hash_test_driver
   hash/hash_traits.t.cpp
   )
 
-target_include_directories(hash_test_driver
-  PRIVATE
-  ${PROJECT_SOURCE_DIR}
+add_executable(hash_append_test_driver
+  hash/hash_append.t.cpp
   )
 
 get_target_property(
@@ -24,35 +60,78 @@ get_target_property(
   INTERFACE_INCLUDE_DIRECTORIES
 )
 
-target_include_directories(hash_test_driver
+target_include_directories(sha_256_test_driver
   SYSTEM
   PRIVATE
-  ${Boost_INCLUDE_DIRS}
   ${RapidCheckBoostTest_INCLUDE_DIRS}
 )
 
-target_link_libraries(hash_test_driver
+target_include_directories(hash_test_driver
+  SYSTEM
+  PRIVATE
+  ${RapidCheckBoostTest_INCLUDE_DIRS}
+)
+
+target_include_directories(hash_append_test_driver
+  SYSTEM
+  PRIVATE
+  ${RapidCheckBoostTest_INCLUDE_DIRS}
+)
+
+target_link_libraries(sha_256_test_driver
+  hash_lib
   rapidcheck
   rapidcheck_boost_test
   )
 
-target_compile_options(hash_test_driver
-  PRIVATE
-  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic>
+target_link_libraries(hash_test_driver
+  hash_lib
+  rapidcheck
+  rapidcheck_boost_test
   )
+
+target_link_libraries(hash_append_test_driver
+  hash_lib
+  rapidcheck
+  rapidcheck_boost_test
+  )
+
 set_source_files_properties(
+  hash/hash_append.t.cpp
   hash/hash_traits.t.cpp
+  hash/sha_256.t.cpp
   PROPERTIES
   COMPILE_FLAGS "-Wno-padded -Wno-disabled-macro-expansion -Wno-global-constructors"
   )
+
+set_target_properties(sha_256_test_driver
+  PROPERTIES
+  FOLDER "sha_256_test_driver"
+  )
+
 set_target_properties(hash_test_driver
   PROPERTIES
   FOLDER "hash_test_driver"
   )
 
+set_target_properties(hash_append_test_driver
+  PROPERTIES
+  FOLDER "hash_append_test_driver"
+  )
+
 enable_testing()
+
+add_test(
+  NAME sha_256_test
+  COMMAND sha_256_test_driver
+  )
 
 add_test(
   NAME hash_test
   COMMAND hash_test_driver
+  )
+
+add_test(
+  NAME hash_append_test
+  COMMAND hash_append_test_driver
   )
