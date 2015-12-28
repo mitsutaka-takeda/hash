@@ -21,6 +21,13 @@ namespace  {
 
 BOOST_AUTO_TEST_SUITE(sha_256)
 
+BOOST_AUTO_TEST_CASE(sha_256_hashes_a_empty_message) {
+    using result_t = hash::sha_256::result_type;
+    hash::sha_256 h;
+    h("", 0);
+    BOOST_TEST(result_t{"0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"} == static_cast<result_t>(h));
+}
+
 BOOST_AUTO_TEST_CASE(sha_256_hashes_a_single_block_message) {
    
     using result_t = hash::sha_256::result_type;
