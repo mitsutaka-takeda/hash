@@ -12,6 +12,7 @@ namespace hash {
         using const_iterator = std::vector<char>::const_iterator;
         constexpr static std::size_t BlockSize        = BlockSizeInBits;
         constexpr static std::size_t BlockSizeInBytes = BlockSizeInBits/8;
+
         constexpr 
         message_block(const_iterator begin_) 
             : begin(begin_)

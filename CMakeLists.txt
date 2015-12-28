@@ -44,6 +44,12 @@ target_compile_options(hash_lib
   $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic>
   )
 
+set_source_files_properties(
+  hash/sha_256.cpp
+  PROPERTIES
+  COMPILE_FLAGS "-Wno-padded -Wno-disabled-macro-expansion -Wno-global-constructors"
+  )
+
 add_executable(message_block_test_driver
   hash/message_block.t.cpp
 )

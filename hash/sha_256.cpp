@@ -10,7 +10,7 @@ namespace  {
     constexpr uint32_t Ch(uint32_t x, uint32_t y, uint32_t z){
         return (x & y) ^ ((~x) & z);
     }
-    
+
     constexpr uint32_t Maj(uint32_t x, uint32_t y, uint32_t z) {
         return (x & y) ^ (x & z) ^ (y & z);
     }
@@ -38,7 +38,7 @@ namespace  {
     constexpr uint32_t sigma_1_256(uint32_t x){
         return ROTR(17, x) ^ ROTR(19, x) ^ SHR(10, x);
     }
-} // namespace 
+} // namespace
 
 void
 hash::sha_256::operator()(void const* key, std::size_t len) {
@@ -52,24 +52,22 @@ hash::sha_256::operator()(void const* key, std::size_t len) {
          0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
          0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2}
     };
+    using sha_256_message_block = hash::message_block<512>;
+    // * 8 for converting bytes to bits.
+	// + 1 for appended 1 bit in the algorithm.
+    const auto len_in_bits = static_cast<uint64_t>(len*8);
+    const auto ps_in_bits = sha_256_message_block::padding_size(len_in_bits + 1);
+    // Round up any sub-byte bits "ps_in_bits%8" to 1 byte.
+    const auto ps_in_bytes = ps_in_bits/8 + ((ps_in_bits % 8 == 0) ? 0 : 1);
 
-    // len*8 + 1 + k = 448 mod 512
-    // =>
-    // len * 8 + 8 * m = 8 * 56 mod 8 * 64
-    //   where 1 + k = 8 * m
-    // =>
-    // len + m = 56 mod 64
-    const auto m = (56 - len + 64) % 64;
-
-    std::vector<char> padded_message(len + m + 8);
+    std::vector<char> padded_message(len + ps_in_bytes + 8);
     std::copy(reinterpret_cast<char const*>(key), reinterpret_cast<char const*>(key)+len, padded_message.begin());
     padded_message[len] |= 0b10000000;
-    const auto len_in_bits = static_cast<uint64_t>(len*8);
     std::copy(std::reverse_iterator<char const*>(reinterpret_cast<char const*>(&len_in_bits) + sizeof(uint64_t)),
               std::reverse_iterator<char const*>(reinterpret_cast<char const*>(&len_in_bits)),
-              padded_message.begin() + static_cast<std::vector<char>::difference_type>(len + m));
+              padded_message.begin() + static_cast<std::vector<char>::difference_type>(len + ps_in_bytes));
 
-    const auto msbs = message_block<512>::message_blocks(padded_message);
+    const auto msbs = sha_256_message_block::message_blocks(padded_message);
 
     std::array<uint32_t, 64> W;// message schedule
 
@@ -87,12 +85,12 @@ hash::sha_256::operator()(void const* key, std::size_t len) {
 
         uint32_t
             a = H[0],
-            b = H[1], 
+            b = H[1],
             c = H[2],
             d = H[3],
             e = H[4],
-            f = H[5], 
-            g = H[6], 
+            f = H[5],
+            g = H[6],
             h = H[7];
 
         for(uint8_t t = 0; t < 64; ++t){
@@ -122,9 +120,12 @@ hash::sha_256::operator()(void const* key, std::size_t len) {
 hash::sha_256::operator result_type() {
     std::string r = "0x";
     boost::cnv::cstream ccnv;
-    ccnv(std::hex)(std::setw(sizeof(uint32_t)/2))(std::setfill('0'));
+    ccnv(std::hex)(std::setfill('0'));
     for(auto h : H){
-        r += boost::convert<std::string>(h, ccnv).value();
+        // Be careful setw is cleared after an extraction operator is called.
+        // So we need to setw for each iteration.
+        r += boost::convert<std::string>(h, ccnv(std::setw(sizeof(uint32_t)*2))).value();
     }
+
     return result_type{r};
 }
