@@ -8,6 +8,28 @@ if(NOT TARGET rapidcheck)
   add_subdirectory("../rapidcheck" "${CMAKE_BINARY_DIR}/rapidcheck")
 endif()
 
+set(LIB_FUZZER_SRC_PATH "" CACHE PATH "The path to the root of LibFuzzer directory. This directory must contain
+cpp files for LibFuzzer. If you want to use LibFuzzer in the LLVM repository, set LIB_FUZZER_SRC_PATH to 
+llvm/lib/Fuzzer.")
+
+if((NOT TARGET libfuzzer) AND LIB_FUZZER_SRC_PATH)
+  message(STATUS "Enable LibFuzzer at ${LIB_FUZZER_SRC_PATH}")
+  # CMakeLists.txt in the llvm's LibFuzzer requires the variable LLVM_USE_SANITIZE_COVERAGE
+  # set to ON.
+  set(LLVM_USE_SANITIZE_COVERAGE ON)
+  add_subdirectory(${LIB_FUZZER_SRC_PATH} "${CMAKE_BINARY_DIR}/libfuzzer")
+  target_compile_options(LLVMFuzzerNoMainObjects
+    PRIVATE
+    $<$<CXX_COMPILER_ID:Clang>:-std=c++11>
+    )
+  target_compile_options(LLVMFuzzer
+    PRIVATE
+    $<$<CXX_COMPILER_ID:Clang>:-std=c++11>
+    )
+else()
+  message(STATUS "Disable LibFuzzer. To enable it, set LIB_FUZZER_SRC_PATH")
+endif()
+
 add_library(hash_lib
   hash/hash_append.cpp
   hash/hash_append.hpp
@@ -189,4 +211,63 @@ set_target_properties(hash_append_test_driver
 add_test(
   NAME hash_append_test
   COMMAND hash_append_test_driver
+  )
+
+# Library for Fuzzing
+add_library(hash_lib_for_fuzzing
+  hash/hash_append.cpp
+  hash/hash_append.hpp
+  hash/hash_traits.cpp
+  hash/hash_traits.hpp
+  hash/integral.cpp
+  hash/integral.hpp
+  hash/message_block.cpp
+  hash/message_block.hpp
+  hash/sha_256.cpp
+  hash/sha_256.hpp
+  hash/uhash.cpp
+  hash/uhash.hpp
+  )
+
+set_target_properties(hash_lib_for_fuzzing
+  PROPERTIES
+  FOLDER "hash_lib_for_fuzzing"
+  )
+target_include_directories(hash_lib_for_fuzzing
+  PUBLIC
+  ${PROJECT_SOURCE_DIR}
+  )
+target_include_directories(hash_lib_for_fuzzing
+  SYSTEM
+  PUBLIC
+  ${Boost_INCLUDE_DIRS}
+  )
+target_compile_options(hash_lib_for_fuzzing
+  PUBLIC
+  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -fsanitize-coverage=edge,indirect-calls -fsanitize=address>
+  )
+
+# Fuzzing for sha-256
+add_executable(sha_256_fuzzer_driver
+  fuzzing/sha_256_fuzzer.cpp
+  )
+
+target_compile_options(sha_256_fuzzer_driver
+  PUBLIC
+  $<$<CXX_COMPILER_ID:Clang>:-std=c++14 -Werror -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -fsanitize-coverage=edge,indirect-calls -fsanitize=address>
+  )
+
+target_link_libraries(sha_256_fuzzer_driver
+  hash_lib_for_fuzzing
+  LLVMFuzzer
+  )
+
+set_target_properties(sha_256_fuzzer_driver
+  PROPERTIES
+  LINK_FLAGS "-fsanitize=address -fsanitize-memory-track-origins"
+  )
+
+add_test(
+  NAME sha_256_fuzzer
+  COMMAND sha_256_fuzzer_driver
   )
