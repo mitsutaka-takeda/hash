@@ -214,21 +214,14 @@ add_test(
   )
 
 # Library for Fuzzing
-add_library(hash_lib_for_fuzzing
-  hash/hash_append.cpp
-  hash/hash_append.hpp
-  hash/hash_traits.cpp
-  hash/hash_traits.hpp
-  hash/integral.cpp
-  hash/integral.hpp
-  hash/message_block.cpp
-  hash/message_block.hpp
-  hash/sha_256.cpp
-  hash/sha_256.hpp
-  hash/uhash.cpp
-  hash/uhash.hpp
+get_target_property(
+  HashLib_SOURCES
+  hash_lib
+  SOURCES
   )
-
+add_library(hash_lib_for_fuzzing
+  ${HashLib_SOURCES}
+  )
 set_target_properties(hash_lib_for_fuzzing
   PROPERTIES
   FOLDER "hash_lib_for_fuzzing"
