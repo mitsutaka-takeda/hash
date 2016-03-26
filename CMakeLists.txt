@@ -7,6 +7,15 @@ find_package(Boost 1.59.0 REQUIRED)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(CXX_DfineBDEStyleComponent)
 
+if(NOT TARGET range-v3)
+  add_subdirectory("../range-v3" "${CMAKE_BINARY_DIR}/range-v3")
+  set_target_properties(
+    range-v3
+    PROPERTIES
+    INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:range-v3,INTERFACE_INCLUDE_DIRECTORIES>
+    )
+endif()
+
 if(NOT TARGET rapidcheck)
   add_subdirectory("../rapidcheck" "${CMAKE_BINARY_DIR}/rapidcheck")
   set_target_properties(

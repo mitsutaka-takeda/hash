@@ -4,6 +4,7 @@
 #include <boost/convert/stream.hpp>
 #include <boost/endian/conversion.hpp>
 
+#include "bitwise_operations.hpp"
 #include "message_block.hpp"
 
 namespace  {
@@ -19,24 +20,20 @@ namespace  {
         return x >> n;
     }
 
-    constexpr uint32_t ROTR(uint8_t n, uint32_t x){
-        return (x >> n) | (x << (std::numeric_limits<uint32_t>::digits - n));
-    }
-
     constexpr uint32_t Sigma_0_256(uint32_t x){
-        return ROTR(2, x) ^ ROTR(13, x) ^ ROTR(22, x);
+        return hash::bitwise_operations::ROTR(2, x) ^ hash::bitwise_operations::ROTR(13, x) ^ hash::bitwise_operations::ROTR(22, x);
     }
 
     constexpr uint32_t Sigma_1_256(uint32_t x){
-        return ROTR(6, x) ^ ROTR(11, x) ^ ROTR(25, x);
+        return hash::bitwise_operations::ROTR(6, x) ^ hash::bitwise_operations::ROTR(11, x) ^ hash::bitwise_operations::ROTR(25, x);
     }
 
     constexpr uint32_t sigma_0_256(uint32_t x){
-        return ROTR(7, x) ^ ROTR(18, x) ^ SHR(3, x);
+        return hash::bitwise_operations::ROTR(7, x) ^ hash::bitwise_operations::ROTR(18, x) ^ SHR(3, x);
     }
 
     constexpr uint32_t sigma_1_256(uint32_t x){
-        return ROTR(17, x) ^ ROTR(19, x) ^ SHR(10, x);
+        return hash::bitwise_operations::ROTR(17, x) ^ hash::bitwise_operations::ROTR(19, x) ^ SHR(10, x);
     }
 } // namespace
 
