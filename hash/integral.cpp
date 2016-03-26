@@ -1,1 +1,1 @@
-#include "hash/integral.hpp"
+#include "integral.hpp"

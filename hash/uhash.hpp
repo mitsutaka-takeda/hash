@@ -1,8 +1,8 @@
 #pragma once
 
-#include "hash/hash_append.hpp"
+#include "hash_append.hpp"
 
-#include "hash/hash_algorithm_concept.hpp"
+#include "hash_algorithm_concept.hpp"
 
 namespace hash {
     template <class H>

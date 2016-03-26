@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <vector>
 
-#include "hash/hash_traits.hpp"
+#include "hash_traits.hpp"
 
 namespace hash {
     namespace detail {

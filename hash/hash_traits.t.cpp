@@ -4,7 +4,7 @@
 
 #include <cstring>
 
-#include "hash/hash_traits.hpp"
+#include "hash_traits.hpp"
 
 BOOST_AUTO_TEST_SUITE(Integral_is_contiguously_hashable)
 

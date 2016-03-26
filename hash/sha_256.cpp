@@ -1,10 +1,10 @@
-#include "hash/sha_256.hpp"
+#include "sha_256.hpp"
 
 #include <boost/convert.hpp>
 #include <boost/convert/stream.hpp>
 #include <boost/endian/conversion.hpp>
 
-#include "hash/message_block.hpp"
+#include "message_block.hpp"
 
 namespace  {
     constexpr uint32_t Ch(uint32_t x, uint32_t y, uint32_t z){

@@ -3,7 +3,7 @@
 
 #include <rapidcheck/boost_test.h>
 
-#include "hash/message_block.hpp"
+#include "message_block.hpp"
 
 namespace  {
     using sha_256_message_block = hash::message_block<512>;

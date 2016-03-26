@@ -3,7 +3,7 @@
 
 #include <rapidcheck/boost_test.h>
 
-#include "hash/sha_256.hpp"
+#include "sha_256.hpp"
 
 namespace  {
     

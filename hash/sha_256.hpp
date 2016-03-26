@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "hash/integral.hpp"
+#include "integral.hpp"
 
 namespace hash {
     class sha_256 {
