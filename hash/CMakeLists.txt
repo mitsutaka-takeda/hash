@@ -43,4 +43,5 @@ target_link_libraries(
   keccak_256
   PUBLIC
   range-v3
+  bitwise_operations
   )
