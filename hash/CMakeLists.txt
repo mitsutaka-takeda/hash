@@ -44,4 +44,5 @@ target_link_libraries(
   PUBLIC
   range-v3
   bitwise_operations
+  rapidcheck_boost_test
   )

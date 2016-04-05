@@ -1,5 +1,7 @@
 #define BOOST_TEST_MODULE keccak_test
 #include <boost/test/included/unit_test.hpp>
+
+#include <rapidcheck/boost_test.h>
 #include <array>
 
 #include "keccak_256.hpp"
@@ -15,6 +17,14 @@ BOOST_AUTO_TEST_CASE( theta_step_update_lanes )
     hash::keccak_256::rho_and_pi_steps<1600>(a, b);
     hash::keccak_256::chi_step<1600>(a, b);
     hash::keccak_256::iota_step<1600>(a, 10);
+}
+
+RC_BOOST_PROP( padding_length_should_be_multiple_of_first_argument,
+               (uint16_t x, int64_t m) ){
+    RC_PRE( 0 < x );
+    RC_PRE( x <= m );
+    RC_PRE( x <= 1600 );
+    RC_ASSERT( ((m + std::get<1>(hash::keccak_256::pad(x,m))) % x) == 0 );
 }
 
 BOOST_AUTO_TEST_CASE( iota_step_takes_xor_with_a_round_constant ) {

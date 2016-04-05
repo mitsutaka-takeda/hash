@@ -33,11 +33,12 @@ namespace hash {
         std::array<uint64_t, 24> const RC;
         // The round constants of KECCAK-f round.
 
-        template <uint32_t r, uint32_t c>
+        template <uint32_t r = 1024, uint32_t c = 576>
         static
         result_type
         KECCAK(const void* M);
         // Compute KECCAK[r, c] sponge function where, r is the bitrate, and c is the capacity.
+        // r + c must be 1600.
 
         template <uint32_t b>
         static
@@ -84,7 +85,18 @@ namespace hash {
             state_type<b/25>& A,
             uint64_t RCi
             ) noexcept;
+
+
+        static
+        std::pair<std::bitset<1600>, int64_t>
+        pad(uint32_t x, int64_t m) noexcept;
+        // Returns a padding, a string with an appropriate length to append to another string.
+        // A padding is represented as a buffer of std::bitset<1600> and the length.
+        // pad is undefined unless x is a positive integer less than or equal to 1600,
+        // i.e., 0 < x <= 1600. A padding has a property that its length added to m is
+        // a positive multiple of x, i.e., (m + std::get<1>(pad(x, m))) % x == 0.
     };
+
 } // namespace hash
 
 std::array<uint64_t, 24> const
@@ -115,13 +127,14 @@ hash::keccak_256::RC = {{
         0x80000000'80008008
     }};
 
-template <uint32_t Bitrate, uint32_t Capacity>
+template <uint32_t r, uint32_t c>
 hash::keccak_256::result_type
 hash::keccak_256::KECCAK(const void* /*M*/) {
+    static_assert( r + c == 1600, "r + c must be 1600");
     // Padding
 
     // Initialization
-    state_type<Bitrate + Capacity> S{};
+    state_type<(r + c)/25> S{};
 
     // Absorbing Phase
 
@@ -250,4 +263,30 @@ hash::keccak_256::iota_step(
     uint64_t RCi
     ) noexcept {
     A[0][0] ^= RCi;
+}
+
+template <typename I0, typename I1>
+std::common_type_t<I0, I1>
+mod(I0 x, I1 y){
+    auto const remainder = x % y;
+    if(remainder < 0){
+        return remainder + y;
+    } else {
+        return remainder;
+    }
+
+}
+
+std::pair<std::bitset<1600>, int64_t>
+hash::keccak_256::pad(uint32_t x, int64_t m) noexcept {
+    assert(0 < x);
+    assert(x <= 1600);
+
+    auto const j = mod(-m - 2, x);
+    assert(j >= 0);
+    std::bitset<1600> P;
+    P[0] = true;
+    P[j + 1] = true;
+
+    return {P, j+2};
 }
