@@ -30,6 +30,15 @@ if(NOT TARGET rapidcheck)
     )
 endif()
 
+if(NOT TARGET GSL)
+  add_subdirectory("../GSL" "${CMAKE_BINARY_DIR}/GSL")
+  set_target_properties(
+    GSL
+    PROPERTIES
+    INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:GSL,INTERFACE_INCLUDE_DIRECTORIES>
+    )
+endif()
+
 option(
   ENABLE_LIB_FUZZER
   "Enable fuzzing tests with LibFuzzer. You need to either provide a library target

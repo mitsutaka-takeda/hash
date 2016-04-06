@@ -43,6 +43,7 @@ target_link_libraries(
   keccak_256
   PUBLIC
   range-v3
+  GSL
   bitwise_operations
   rapidcheck_boost_test
   )

@@ -7,6 +7,7 @@
 #include <range/v3/algorithm/for_each.hpp>
 #include <range/v3/numeric/accumulate.hpp>
 #include <range/v3/view/zip.hpp>
+#include <gsl_util.h>
 
 #include "integral.hpp"
 #include "bitwise_operations.hpp"
@@ -93,8 +94,9 @@ namespace hash {
         // Returns a padding, a string with an appropriate length to append to another string.
         // A padding is represented as a buffer of std::bitset<1600> and the length.
         // pad is undefined unless x is a positive integer less than or equal to 1600,
-        // i.e., 0 < x <= 1600. A padding has a property that its length added to m is
-        // a positive multiple of x, i.e., (m + std::get<1>(pad(x, m))) % x == 0.
+        // i.e., 0 < x <= 1600, and m is non-negative integer. A padding has a property 
+        // that its length added to m is a positive multiple of x, i.e., 
+        // (m + std::get<1>(pad(x, m))) % x == 0.
     };
 
 } // namespace hash
@@ -281,12 +283,13 @@ std::pair<std::bitset<1600>, int64_t>
 hash::keccak_256::pad(uint32_t x, int64_t m) noexcept {
     assert(0 < x);
     assert(x <= 1600);
+    assert(m >= 0);
 
     auto const j = mod(-m - 2, x);
     assert(j >= 0);
     std::bitset<1600> P;
     P[0] = true;
-    P[j + 1] = true;
+    P[gsl::narrow_cast<size_t>(j + 1)] = true;
 
     return {P, j+2};
 }
