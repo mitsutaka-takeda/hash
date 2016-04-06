@@ -1,7 +1,9 @@
 #define BOOST_TEST_MODULE keccak_test
 #include <boost/test/included/unit_test.hpp>
 
+#include <limits>
 #include <rapidcheck/boost_test.h>
+#include <rapidcheck/gen/Numeric.h>
 #include <array>
 
 #include "keccak_256.hpp"
@@ -19,11 +21,9 @@ BOOST_AUTO_TEST_CASE( theta_step_update_lanes )
     hash::keccak_256::iota_step<1600>(a, 10);
 }
 
-RC_BOOST_PROP( padding_length_should_be_multiple_of_first_argument,
-               (uint16_t x, int64_t m) ){
-    RC_PRE( 0 < x );
-    RC_PRE( x <= m );
-    RC_PRE( x <= 1600 );
+RC_BOOST_PROP( padding_length_should_be_multiple_of_first_argument, () ){
+    auto const x = *rc::gen::inRange(1, 1600);
+    auto const m = *rc::gen::inRange(int64_t{0}, std::numeric_limits<int64_t>::max());
     RC_ASSERT( ((m + std::get<1>(hash::keccak_256::pad(x,m))) % x) == 0 );
 }
 
